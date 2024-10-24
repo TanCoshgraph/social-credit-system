@@ -6,16 +6,19 @@
 <body>
     <ul id="rowss">
     {% for k,v in rows.items() %}
-	<form method="get", action="decrement"> 
-      <input type="hidden" name="id" value={{v.id}}> 
-	  <button type='submit'>-</button>
-	</form>
         <li>{{ v.name }}: {{ v.score }}</li>
-	
-    <form method="get", action="increment">
-        <input type="hidden" name="id" value={{v.id}}>
-        <button type='submit'>+</button>
-    </form>
+
+        <div style="display: inline-flex">
+            <form method="get", action="decrement"> 
+                <input type="hidden" name="id" value={{v.id}}> 
+                <button type='submit'>-</button>
+            </form>
+
+            <form method="get", action="increment">
+                <input type="hidden" name="id" value={{v.id}}>
+                <button type='submit'>+</button>
+            </form>
+        </div>
     {% endfor %}
     </ul>
 </body>

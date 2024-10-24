@@ -35,6 +35,7 @@ def re_init_people():
         people[person.id] = person
     with open('people', 'wb') as f:
         pickle.dump(people, f)
+    return people
 
 def get_people():
     try:
@@ -43,7 +44,7 @@ def get_people():
         if people is None or people == [] or people == {}:
             re_init_people()
     except:
-        re_init_people()
+        return re_init_people()
     return people
 
 @app.route("/")
