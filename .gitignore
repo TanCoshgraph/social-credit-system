@@ -1,2 +1,4 @@
 people
 .venv
+instance
+__pycache__

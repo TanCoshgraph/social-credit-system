@@ -5,7 +5,7 @@
 </head>
 <body>
     <ul id="rowss">
-    {% for k,v in rows.items() %}
+    {% for v in rows %}
         <li>{{ v.name }}: {{ v.score }}</li>
 
         <div style="display: inline-flex">
