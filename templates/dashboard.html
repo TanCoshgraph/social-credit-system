@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Scoreboard</title>
+</head>
+<body>
+    <p>{{status}}</p>
+    <form method="post" action="transfer_points">
+        points to send: <input name="points">
+        <br>
+        <!-- sender: <input name="sender_id"> -->
+        <label for="sender_id">Sender (you):</label>
+        <select id="sender" name="sender_id">
+          <option value='1'>Sean</option>
+          <option value='2'>Dan</option>
+          <option value='3'>Rebecca</option>
+        </select>
+
+        <br>
+        <label for="recipient_id">Recipient              :</label>
+        <select id="recipient" name="recipient_id">
+          <option value='1'>Sean</option>
+          <option value='2'>Dan</option>
+          <option value='3'>Rebecca</option>
+        </select>
+        <br>
+        note (optional): <input name="note">
+        <br>
+        personal code: <input name="code">
+        <br/><br/>
+        <button type="submit">Submit</button>
+      </form>
+
+</body>
+</html>

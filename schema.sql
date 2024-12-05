@@ -5,3 +5,25 @@ CREATE TABLE user (
   username TEXT UNIQUE NOT NULL,
   password TEXT NOT NULL
 );
+
+DROP TABLE IF EXISTS people;
+
+CREATE TABLE people(
+  id INTEGER PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL,
+  score INTEGER) WITHOUT ROWID;
+
+DROP TABLE IF EXISTS transfers;
+
+CREATE TABLE transfers(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  amount INTEGER NOT NULL,
+  note TEXT NOT NULL,
+  person_from_id INTEGER NOT NULL,
+  person_to_id INTEGER NOT NULL,
+  FOREIGN KEY(person_from_id) REFERENCES people(id),
+  FOREIGN KEY(person_to_id) REFERENCES people(id));
+
+ALTER TABLE people ADD passcode TEXT;
+ALTER TABLE people ADD allowance INTEGER DEFAULT 0;
+ALTER TABLE people ADD last_allowance_granted_date DATE;
