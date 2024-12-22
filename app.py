@@ -39,6 +39,18 @@ class Person:
         self.allowance = allowance
         self.last_allowance_granted_date = last_allowance_granted_date
 
+    def calculate_score(self):
+        transfers = get_received_transfers(self)
+        self.score = sum(list(map(lambda transfer : transfer.amount, transfers)))
+        return self.score
+
+    def calculate_allowance(self):
+        transfers = get_sent_transfers(self)
+        todays_transfers = list(filter(lambda transfer : transfer.date == datetime.datetime.now().date(), transfers))
+        todays_total = sum(list(map(lambda transfer : transfer.amount, todays_transfers)))
+        self.allowance = max(100 - todays_total, 0)
+        return self.allowance
+
 class Transfer:
     def __init__(self, amount, note, sender_id, recipient_id):
         self.amount = amount
@@ -98,14 +110,16 @@ def row_to_person(sql_row):
     date = None
     if date_str != None:
         date = datetime.datetime.strptime(date_str, "%y-%m-%d")
-
-    return Person(sql_row[1], sql_row[2], sql_row[0], sql_row[3], sql_row[4], date)
+    person = Person(sql_row[1], sql_row[2], sql_row[0], sql_row[3], sql_row[4], date)
+    person.calculate_score()
+    person.calculate_allowance()
+    return person
 
 def row_to_transfer(sql_row):
     return Transfer(sql_row[1], sql_row[2], sql_row[3], sql_row[4])
 
 def get_people():
-    query = 'SELECT * FROM people'
+    query = 'SELECT * FROM people where id != 42'
     connection = db.get_db()
     rows = connection.execute(query).fetchall()
     return list(map(row_to_person, rows))
@@ -139,6 +153,12 @@ def update_person(id, attrs_dict):
     connection = db.get_db()
     connection.execute(query)
     connection.commit()
+
+def get_sent_transfers(person):
+    query = f'SELECT * FROM transfers where person_from_id = {person.id}'
+    connection = db.get_db()
+    rows = connection.execute(query).fetchall()
+    return list(map(row_to_transfer, rows))
 
 def get_received_transfers(person):
     query = f'SELECT * FROM transfers where person_to_id = {person.id}'
@@ -176,15 +196,34 @@ def decrement_person_redis(id):
 def decrement_allowance(person, amount):
     if person.allowance <= 0:
         return
-    update_person(person.id, { "allowance": -abs(amount)})
+    update_person(person.id, { "allowance": person.allowance - abs(amount)})
+
+def get_all_people_info():
+    people = get_people()
+    people_info = []
+    for person in people:
+        person_info = {
+            'id': person.id,
+            'name': person.name,
+            'score': person.score,
+            'passcode': person.passcode,
+            'allowance': person.allowance,
+            'last_allowance_granted_date': person.last_allowance_granted_date
+        }
+        people_info.append(person_info)
+    return people_info
 
 @app.route("/")
 def hello_world():
+    return render_dashboard(status=None)
+
+def render_dashboard(status, messages_component_status=None, messages=None):
     people = get_people()
     for person in people:
         transfers = get_received_transfers(person)
         person.score = sum(list(map(lambda transfer : transfer.amount, transfers)))
-    return render_template('scoreboard.html', rows=people)
+    people_info = get_all_people_info()
+    return render_template('scoreboard.html', rows=people, status=status, messages_component_status=messages_component_status, messages=messages, people=people_info)
 
 @app.route("/increment", methods=['GET'])
 def increment():
@@ -230,4 +269,20 @@ def attempt_points_transfer():
         return redirect('/')
     else:
         error_message = "something went wrong (probably your passcode isn't right)"
-    return render_template('dashboard.html', status=error_message)
+    return render_template('scoreboard.html', status=error_message, rows=get_people(), people=get_all_people_info(), messages=None)
+
+def retrieve_messages():
+    passcode = request.form["passcode"]
+    people = get_people()
+    messages = []
+    for person in people:
+        if person.passcode == passcode:
+            transfers = get_received_transfers(person)
+            messages = [transfer.note for transfer in transfers if transfer.note]
+            status = "They should call you Lonely Mc No messages the 3rd :(" if messages == [] else None
+            return render_dashboard(status=None, messages=messages, messages_component_status=status)
+    return render_dashboard(status=None, messages_component_status="Invalid passcode", messages=None)
+
+@app.route("/retrieve_messages", methods=['POST'])
+def retrieve_messages_route():
+    return retrieve_messages()
