@@ -2,34 +2,92 @@
 <html lang="en">
 <head>
     <title>Scoreboard</title>
+    <style>
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .grid-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+    </style>
 </head>
 <body>
-    <p>{{status}}</p>
-    <form method="post" action="transfer_points">
-        points to send: <input name="points">
-        <br>
-        <!-- sender: <input name="sender_id"> -->
-        <label for="sender_id">Sender (you):</label>
-        <select id="sender" name="sender_id">
-          <option value='1'>Sean</option>
-          <option value='2'>Dan</option>
-          <option value='3'>Rebecca</option>
-        </select>
-
-        <br>
-        <label for="recipient_id">Recipient              :</label>
-        <select id="recipient" name="recipient_id">
-          <option value='1'>Sean</option>
-          <option value='2'>Dan</option>
-          <option value='3'>Rebecca</option>
-        </select>
-        <br>
-        note (optional): <input name="note">
-        <br>
-        personal code: <input name="code">
-        <br/><br/>
-        <button type="submit">Submit</button>
-      </form>
-
+    <div class="grid-container">
+        <div class="grid-item">
+            <h2>Scoreboard</h2>
+            <ul id="rowss">
+            {% for v in rows %}
+                <li>{{ v.name }}: {{ v.score }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+        <div class="grid-item">
+            <h2>Transfer Points</h2>
+            {% if status %}
+                <p>{{status}}</p>
+            {% endif %}
+            <form method="post" action="transfer_points">
+                points to send: <input name="points">
+                <br>
+                <label for="sender_id">Sender (you):</label>
+                <select id="sender" name="sender_id">
+                  <option value='2'>Sean</option>
+                  <option value='1'>Dan</option>
+                  <option value='3'>Rebecca</option>
+                </select>
+                <br>
+                <label for="recipient_id">Recipient:</label>
+                <select id="recipient" name="recipient_id">
+                  <option value='2'>Sean</option>
+                  <option value='1'>Dan</option>
+                  <option value='3'>Rebecca</option>
+                </select>
+                <br>
+                note (optional): <input name="note">
+                <br>
+                personal code: <input name="code">
+                <br/><br/>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+        <!-- Add two more grid items here if needed -->
+        <div class="grid-item">
+            <h2>Your Messages</h2>
+            {% if messages %}
+                <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                {% if messages_component_status %}
+                    <p>{{ messages_component_status }}</p>
+                {% endif %}
+                <form method="post" action="retrieve_messages">
+                    <label for="passcode">Enter Passcode:</label>
+                    <input type="password" id="passcode" name="passcode">
+                    <br/><br/>
+                    <button type="submit">Submit</button>
+                </form>
+            {% endif %}
+        </div>
+        <div class="grid-item">
+            <h2>Debugging info</h2>
+            <ul>
+            {% for person in people %}
+                <li>ID: {{ person.id }}</li>
+                <li>Name: {{ person.name }}</li>
+                <li>Score: {{ person.score }}</li>
+                <li>Passcode: {{ person.passcode }}</li>
+                <li>Allowance: {{ person.allowance }}</li>
+                <li>Last Allowance Granted Date: {{ person.last_allowance_granted_date }}</li>
+                <br>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
 </body>
 </html>

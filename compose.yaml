@@ -8,9 +8,3 @@ services:
         - action: sync
           path: .
           target: /code
-  redis-bobedis:
-    image: "redis:6.2-alpine"
-    volumes:
-      - a51f1a98197d1149d1c532013b35ec90152383e8935e6b3b5943fe7b54a5ae99:/data
-volumes:
-  a51f1a98197d1149d1c532013b35ec90152383e8935e6b3b5943fe7b54a5ae99:
