@@ -2,15 +2,81 @@
 <html lang="en">
 <head>
     <title>Scoreboard</title>
+    <link rel="icon" type="image/x-icon" href="https://img.icons8.com/?size=100&id=pWxEvv81GRVE&format=png&color=000000">
     <style>
+        @import url('https://fonts.googleapis.com/css?family=Open+Sans|Rock+Salt|Shadows+Into+Light|Cedarville+Cursive');
+        
+        body {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
         .grid-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
         }
+
         .grid-item {
             border: 1px solid #ccc;
             padding: 10px;
+        }
+        .leader-image {
+            height: 1em;
+            vertical-align: middle;
+        }
+
+        .message-bubble {
+            background-color: lightcyan;
+            border: 2px solid #00008b;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: inline-block;
+            max-width: 36%;
+            display: grid;
+            grid-template-columns: auto auto;
+            grid-template-rows: auto auto;
+            gap: 5px;
+        }
+        .message-content {
+            grid-column: 1;
+            max-width: fit-content;
+            text-align: center;
+        }
+        .message-sender {
+            grid-column: 2;
+            grid-row: 2;
+            text-align: right;
+            margin-top: 5px;
+            font-family: 'MeowScript', cursive;
+        }
+
+        @media (max-width: 1000px) {
+            body {
+                font-size: 4vw;
+            }
+
+            input {
+                height: 3vw;
+            }
+
+            select {
+                height: 4vw;
+                width: 15vw;
+                font-size: 3vw;
+            }
+
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+
+            button {
+                font-size: 3vw; 
+            }
+
+            .message-bubble {
+                max-width: 100%;
+            }
         }
     </style>
 </head>
@@ -20,7 +86,13 @@
             <h2>Scoreboard</h2>
             <ul id="rowss">
             {% for v in rows %}
-                <li>{{ v.name }}: {{ v.score }}</li>
+                <div>
+                    <li>{{ v.name }}: {{ v.score }}
+                    {% if leader != None and v.id == leader.id %}
+                        <img class="leader-image" src="https://img.icons8.com/?size=100&id=upd5xh7hPe0R&format=png&color=000000" alt="Leader">
+                    {% endif %}
+                    </li>
+                </div>
             {% endfor %}
             </ul>
         </div>
@@ -36,14 +108,14 @@
                 <select id="sender" name="sender_id">
                   <option value='2'>Sean</option>
                   <option value='1'>Dan</option>
-                  <option value='3'>Rebecca</option>
+                  <!-- <option value='3'>Rebecca</option> -->
                 </select>
                 <br>
                 <label for="recipient_id">Recipient:</label>
                 <select id="recipient" name="recipient_id">
                   <option value='2'>Sean</option>
                   <option value='1'>Dan</option>
-                  <option value='3'>Rebecca</option>
+                  <!-- <option value='3'>Rebecca</option> -->
                 </select>
                 <br>
                 note (optional): <input name="note">
@@ -59,12 +131,15 @@
             {% if messages %}
                 <ul>
                 {% for message in messages %}
-                    <li>{{ message }}</li>
+                    <div class="message-bubble">
+                        <div class="message-content">{{ message.message }}</div>
+                        <div class="message-sender">- {{ message.sender_name }}</div>
+                    </div>
                 {% endfor %}
                 </ul>
             {% else %}
                 {% if messages_component_status %}
-                    <p>{{ messages_component_status }}</p>
+                    <p style="color: red">{{ messages_component_status }}</p>
                 {% endif %}
                 <form method="post" action="retrieve_messages">
                     <label for="passcode">Enter Passcode:</label>
@@ -75,6 +150,7 @@
             {% endif %}
         </div>
         <div class="grid-item">
+            <!--
             <h2>Debugging info</h2>
             <ul>
             {% for person in people %}
@@ -87,6 +163,7 @@
                 <br>
             {% endfor %}
             </ul>
+            -->
         </div>
     </div>
 </body>

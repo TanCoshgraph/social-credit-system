@@ -79,6 +79,12 @@ class Transfer(db.Model):
     def __repr__(self):
         return f'<Transfer {self.id}: {vars(self)}>'
 
+class Message():
+    def __init__(self, message, sender_name, sender_id=None):
+        self.message = message
+        self.sender_name = sender_name
+        self.sender_id = sender_id
+
 def create_object(db_model_object):
     try: 
         db.session.add(db_model_object)
@@ -129,7 +135,16 @@ def render_dashboard(status, messages_component_status=None, messages=None):
     for person in people:
         person.calculate_score()
     people_info = get_all_people_info()
-    return render_template('dashboard.html', rows=people, status=status, messages_component_status=messages_component_status, messages=messages, people=people_info)
+
+    scores = list(map(lambda person: [person.score, person], people))
+    max_person = max(people, key=lambda person: person.score)
+    max_score = max_person.score
+    maxes = list(filter(lambda person: person.score == max_score, people))
+    unique_max = len(maxes) == 1
+
+    leader = max_person if unique_max else None
+
+    return render_template('dashboard.html', rows=people, status=status, messages_component_status=messages_component_status, messages=messages, people=people_info, leader=leader)
 
 @app.route("/transfer_points", methods=['POST'])
 def attempt_points_transfer():
@@ -154,7 +169,7 @@ def attempt_points_transfer():
         return redirect('/')
     else:
         error_message = "Something went wrong (probably your passcode isn't right)"
-    return render_template('dashboard.html', status=error_message, rows=get_people(), people=get_all_people_info(), messages=None)
+    return render_dashboard(status=error_message, messages=None)
 
 def retrieve_messages():
     passcode = request.form["passcode"]
@@ -162,7 +177,7 @@ def retrieve_messages():
     messages = []
     for person in people:
         if person.passcode == passcode:
-            messages = [transfer.note for transfer in person.received_transfers if transfer.note]
+            messages = [Message(transfer.note, transfer.sender.name) for transfer in person.received_transfers if transfer.note]
             status = "They should call you Lonely Mc No messages the 3rd :(" if messages == [] else None
             return render_dashboard(status=None, messages=messages, messages_component_status=status)
     return render_dashboard(status=None, messages_component_status="Invalid passcode", messages=None)
