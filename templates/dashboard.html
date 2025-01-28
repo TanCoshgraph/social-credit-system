@@ -16,6 +16,21 @@
             gap: 10px;
         }
 
+        .header-subtitle {
+            font-size: 0.7em;
+            color: gray;
+            vertical-align: text-top;
+            padding-top: 0%;
+            position: relative;
+
+        }
+
+        .header-with-subtitle {
+            padding-bottom: 0%;
+            position: relative;
+            margin-bottom: 0%;
+        }
+
         .grid-item {
             border: 1px solid #ccc;
             padding: 10px;
@@ -97,7 +112,8 @@
             </ul>
         </div>
         <div class="grid-item">
-            <h2>Transfer Points</h2>
+            <h2 class="header-with-subtitle">Transfer Points</h2>
+            <h3 class="header-subtitle">Daily allowance: 100</h3>
             {% if status %}
                 <p>{{status}}</p>
             {% endif %}
@@ -106,16 +122,16 @@
                 <br>
                 <label for="sender_id">Sender (you):</label>
                 <select id="sender" name="sender_id">
-                  <option value='2'>Sean</option>
-                  <option value='1'>Dan</option>
-                  <!-- <option value='3'>Rebecca</option> -->
+                    {% for person in rows %}
+                        <option value='{{ person.id }}'>{{ person.name }}</option>
+                    {% endfor %}
                 </select>
                 <br>
                 <label for="recipient_id">Recipient:</label>
                 <select id="recipient" name="recipient_id">
-                  <option value='2'>Sean</option>
-                  <option value='1'>Dan</option>
-                  <!-- <option value='3'>Rebecca</option> -->
+                    {% for person in rows %}
+                        <option value='{{ person.id }}'>{{ person.name }}</option>
+                    {% endfor %}
                 </select>
                 <br>
                 note (optional): <input name="note">
