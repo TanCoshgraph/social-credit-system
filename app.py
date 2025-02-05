@@ -37,6 +37,7 @@ except OSError:
     pass
 
 ADMIN_ID = 42
+app.secret_key = "super_secret_key" 
 
 def admin_exists():
     return get_admin() != None
@@ -79,12 +80,6 @@ class Transfer(db.Model):
     def __repr__(self):
         return f'<Transfer {self.id}: {vars(self)}>'
 
-class Message():
-    def __init__(self, message, sender_name, sender_id=None):
-        self.message = message
-        self.sender_name = sender_name
-        self.sender_id = sender_id
-
 def create_object(db_model_object):
     try: 
         db.session.add(db_model_object)
@@ -98,6 +93,9 @@ def create_object(db_model_object):
 
 def find_person(id):
     return db.session.query(Person).where(Person.id == id).first()
+
+def find_person_by_name(name):
+    return db.session.query(Person).where(Person.name == name).first()
 
 def get_admin():
     return find_person(42)
@@ -130,7 +128,33 @@ def get_all_people_info():
 def hello_world():
     return render_dashboard(status=None)
 
-def render_dashboard(status, messages_component_status=None, messages=None):
+@app.route('/test_set_id')
+def test_set_id():
+    session['user_id'] = 2
+    return redirect('/')
+
+default_user_id = 0
+
+def retrieve_messages(person_id):
+    person = find_person(person_id)
+    messages = [transfer for transfer in person.received_transfers]
+    return messages if (messages != None and messages != []) else None
+
+def render_dashboard(status, messages_component_status=None):
+    # Header
+    if 'user_id' in session:
+        user_id = session['user_id']
+    else:
+        user_id = default_user_id
+
+    current_user = find_person(user_id)
+    if current_user == None:
+        return redirect('/login')
+    else:
+        return render_dashboard_signed_in(current_user)
+    
+
+def render_dashboard_signed_in(user, status=None, messages_component_status=None):
     people = get_people()
     for person in people:
         person.calculate_score()
@@ -144,44 +168,71 @@ def render_dashboard(status, messages_component_status=None, messages=None):
 
     leader = max_person if unique_max else None
 
-    return render_template('dashboard.html', rows=people, status=status, messages_component_status=messages_component_status, messages=messages, people=people_info, leader=leader)
+    # Messages
+    messages = retrieve_messages(user.id)
+    if messages == None:
+        messages_component_status = "No messages. They should call you Lonely Mc No messages the 3rd :("
+
+    return render_template('dashboard.html',
+                            current_user=user,
+                            rows=people,
+                            status=status,
+                            messages_component_status=messages_component_status,
+                            messages=messages,
+                            people=people_info,
+                            leader=leader)
 
 @app.route("/transfer_points", methods=['POST'])
 def attempt_points_transfer():
-    code = request.form["code"]
     sender_id = int(request.form["sender_id"])
     sender = find_person(sender_id)
+
+    # Verify that sender is current_user 
+    if sender_id != user_id:
+        return "Unauthorized"
+
     amount = int(request.form["points"]) if request.form["points"] else 0
     recipient_id = int(request.form["recipient_id"])
     error_message = ""
     if amount == 0:
-        error_message = "Amount must be non-zero. Try again fool"
+        error_message = "Amount must be non-zero. Try again"
     elif sender_id == recipient_id:
         error_message = "Sending points to yourself? Sad. Minus 5 points for bringing down the vibe"
         transfer = Transfer(amount=-5, note="Bringing down the vibe", person_from_id=ADMIN_ID, person_to_id=sender_id)
         create_object(transfer)
     elif sender.calculate_allowance() - amount < 0:
         error_message = "You don't have anough allowance! Try again tomorrow"
-    elif sender.passcode == None or code == sender.passcode:
+    elif (sender_id == user_id) & (sender != None) & (find_person(user_id) != None):
         note = request.form["note"]
         transfer = Transfer(amount=amount, note=note, person_from_id=sender_id, person_to_id=recipient_id)
         create_object(transfer)
         return redirect('/')
     else:
-        error_message = "Something went wrong (probably your passcode isn't right)"
-    return render_dashboard(status=error_message, messages=None)
+        print("current_user:")
+        print(find_person(user_id))
+        error_message = "Something went wrong"
+    # TODO: Store error message in session
+    print(error_message)
+    return redirect('/')
 
-def retrieve_messages():
-    passcode = request.form["passcode"]
-    people = get_people()
-    messages = []
-    for person in people:
-        if person.passcode == passcode:
-            messages = [Message(transfer.note, transfer.sender.name) for transfer in person.received_transfers if transfer.note]
-            status = "They should call you Lonely Mc No messages the 3rd :(" if messages == [] else None
-            return render_dashboard(status=None, messages=messages, messages_component_status=status)
-    return render_dashboard(status=None, messages_component_status="Invalid passcode", messages=None)
 
 @app.route("/retrieve_messages", methods=['POST'])
 def retrieve_messages_route():
     return retrieve_messages()
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        name = request.form["name"]
+        person = find_person_by_name(name)
+        if person:
+            session['user_id'] = person.id
+            return redirect('/')
+        else:
+            return "User not found <br> <a href='/'>Go Back</a>", 404
+    return render_template('login.html')
+
+@app.route("/logout", methods=['POST'])
+def logout():
+    session.clear()
+    return redirect('/login')

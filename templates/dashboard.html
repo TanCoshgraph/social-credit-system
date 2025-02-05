@@ -53,6 +53,13 @@
             grid-template-rows: auto auto;
             gap: 5px;
         }
+
+        .message-date {
+            grid-column: 2;
+            grid-row: 1;
+            text-align: right;
+            font-family: 'MeowScript', cursive;
+        }
         .message-content {
             grid-column: 1;
             max-width: fit-content;
@@ -93,9 +100,35 @@
                 max-width: 100%;
             }
         }
+
+        .transfer-form {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+        .transfer-form label {
+            text-align: right;
+            padding-right: 10px;
+        }
+        .transfer-form input, button, .transfer-form select {
+            width: 100%;
+            max-width: 300px; /* Set a maximum width for the input column */
+        }
+        .sign-out {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
     </style>
 </head>
 <body>
+    {% if current_user != None %}
+        <h1>Hello {{current_user.name}}</h1>
+        <form method="post" action="/logout" class="sign-out">
+            <button type="submit">Sign Out</button>
+        </form>
+    {% endif %}
     <div class="grid-container">
         <div class="grid-item">
             <h2>Scoreboard</h2>
@@ -117,27 +150,19 @@
             {% if status %}
                 <p>{{status}}</p>
             {% endif %}
-            <form method="post" action="transfer_points">
-                points to send: <input name="points">
-                <br>
-                <label for="sender_id">Sender (you):</label>
-                <select id="sender" name="sender_id">
-                    {% for person in rows %}
-                        <option value='{{ person.id }}'>{{ person.name }}</option>
-                    {% endfor %}
-                </select>
-                <br>
+            <form method="post" action="transfer_points" class="transfer-form">
                 <label for="recipient_id">Recipient:</label>
                 <select id="recipient" name="recipient_id">
-                    {% for person in rows %}
+                    {% for person in rows if not person.id == current_user.id %}
                         <option value='{{ person.id }}'>{{ person.name }}</option>
                     {% endfor %}
                 </select>
-                <br>
-                note (optional): <input name="note">
-                <br>
-                personal code: <input name="code">
-                <br/><br/>
+                <label for="points">Amount to send:</label>
+                <input id="points" name="points">
+                <label for="note">Message (optional):</label>
+                <input id="note" name="note">
+                <input type="hidden" name="sender_id" value="{{ current_user.id }}">
+                <div></div>
                 <button type="submit">Submit</button>
             </form>
         </div>
@@ -147,22 +172,22 @@
             {% if messages %}
                 <ul>
                 {% for message in messages %}
-                    <div class="message-bubble">
-                        <div class="message-content">{{ message.message }}</div>
-                        <div class="message-sender">- {{ message.sender_name }}</div>
-                    </div>
+                    {% for person in rows %}
+                        {% if person.id == message.person_from_id %}
+                            <div class="message-bubble">
+                                <div class="message-content">{{message.amount}} pts.</div>
+                                <div class="message-date">{{ message.created_at.strftime('%d-%m-%Y') }}</div>
+                                {% if message.note != None %}
+                                    <div class="message-content">{{ message.note }}</div>
+                                {% endif %}
+                                <div class="message-sender">- {{ person.name }}</div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
                 {% endfor %}
                 </ul>
             {% else %}
-                {% if messages_component_status %}
-                    <p style="color: red">{{ messages_component_status }}</p>
-                {% endif %}
-                <form method="post" action="retrieve_messages">
-                    <label for="passcode">Enter Passcode:</label>
-                    <input type="password" id="passcode" name="passcode">
-                    <br/><br/>
-                    <button type="submit">Submit</button>
-                </form>
+                <p style="color: red">{{ messages_component_status }}</p>
             {% endif %}
         </div>
         <div class="grid-item">
