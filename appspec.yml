@@ -1,5 +1,10 @@
 version: 0.0
+
+os: linux
+files:
+  - source: /
+    destination: /myFolderHereItIs
 hooks:
    ApplicationStart:
      - location: social-credit-system/run_app.sh       
-       runas: administrator
+       runas: root 
