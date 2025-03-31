@@ -22,15 +22,50 @@
     "YELA" 0;
 }
 
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  text-align: center;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.form-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+form label {
+  margin-right: 10px;
+}
+
 </style>
 </head>
 <body>
-    <h1 class="sixtyfour-convergence-1">Welcome to THE SCOREBOARD </h1>
-    <h2>Login</h2>
-    <form method="post" action="/login">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
-        <button type="submit">Login</button>
-    </form>
+    <div class="container">
+        <h1 class="sixtyfour-convergence-1">Welcome to THE SCOREBOARD </h1>
+        <!-- <h2>Log in</h2> -->
+        <form method="post" action="/login">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+    </div>
 </body>
 </html>
