@@ -1,0 +1,5 @@
+version: 0.0
+hooks:
+   ApplicationStart:
+     - location: social-credit-system/run_app.sh       
+       runas: administrator
