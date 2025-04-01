@@ -1,13 +1,12 @@
 version: 0.0
-
 os: linux
 files:
   - source: ./
-    destination: ./myFolderHereItIs
+    destination: /tmp/social-credit-system/
 hooks:
    BeforeInstall:
-      - location: prepare_dir.sh
+      - location: ./prepare_dir.sh
         runas: root
    ApplicationStart:
-     - location: run_app.sh       
+     - location: ./run_app.sh       
        runas: root 
