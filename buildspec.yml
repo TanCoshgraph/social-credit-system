@@ -1,0 +1,17 @@
+version: 0.2
+
+phases:
+    install:
+        runtime-versions:
+            python: latest
+        commands:
+            - echo "installing pythong"
+    pre_build:
+        commands:
+            - echo: "In pre-build phase... not doing much"
+    build:
+        commands:
+            - echo "in the build phase now"
+    post_build:
+        commands:
+            - echo "in the post-build phase"
