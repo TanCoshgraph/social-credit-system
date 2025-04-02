@@ -8,7 +8,7 @@ phases:
             - echo "installing pythong"
     pre_build:
         commands:
-            - echo: "In pre-build phase... not doing much"
+            - echo "In pre-build phase... not doing much"
     build:
         commands:
             - echo "in the build phase now"
