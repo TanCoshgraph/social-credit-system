@@ -6,6 +6,6 @@ ENV FLASK_RUN_HOST=0.0.0.0
 RUN apk add --no-cache gcc musl-dev linux-headers
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
-EXPOSE 8000
+EXPOSE 8080
 COPY . .
-CMD ["flask", "run", "--debug"]
+CMD ["flask", "run", "--host=0.0.0.0", "--port=8080"]

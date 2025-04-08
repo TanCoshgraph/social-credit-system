@@ -80,6 +80,9 @@ class Transfer(db.Model):
     def __repr__(self):
         return f'<Transfer {self.id}: {vars(self)}>'
 
+with app.app_context():
+    db.create_all()
+
 def create_object(db_model_object):
     try: 
         db.session.add(db_model_object)
