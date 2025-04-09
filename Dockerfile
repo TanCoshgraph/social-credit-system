@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM python:3.10-alpine
+FROM public.ecr.aws/docker/library/python:3.9.21-bookworm
 WORKDIR /code
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
