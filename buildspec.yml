@@ -14,7 +14,7 @@ phases:
     post_build:
         commands:
             - echo "Build the zip file"
-            - zip -r deploy.zip Dockerun.aws.json
+            - zip -r deploy.zip Dockerrun.aws.json
 artifacts:
     files:
         - deploy.zip
