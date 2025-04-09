@@ -1,0 +1,12 @@
+{
+    "AWSEBDockerrunVersion": "1",
+    "Image": {
+      "Name": "730335528611.dkr.ecr.eu-west-1.amazonaws.com/scs-docker-image:latest",
+      "Update": "true"
+    },
+    "Ports": [
+      {
+        "ContainerPort": 5000
+      }
+    ]
+  }

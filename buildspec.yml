@@ -1,17 +1,20 @@
 version: 0.2
 
 phases:
-    install:
-        runtime-versions:
-            python: latest
-        commands:
-            - echo "installing pythong"
     pre_build:
         commands:
-            - echo "In pre-build phase... not doing much"
+            - echo "Get credentials and reference to the ECR"
+            - aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 730335528611.dkr.ecr.eu-west-1.amazonaws.com
     build:
         commands:
-            - echo "in the build phase now"
+            - echo "Build Docker image, save locally"
+            - docker build -t scs-docker-image .
+            - docker tag scs-docker-image:latest 730335528611.dkr.ecr.eu-west-1.amazonaws.com/scs-docker-image:latest
+            - docker push 730335528611.dkr.ecr.eu-west-1.amazonaws.com/scs-docker-image:latest
     post_build:
         commands:
-            - echo "in the post-build phase"
+            - echo "Build the zip file"
+            - zip -r deploy.zip Dockerun.aws.json
+artifacts:
+    files:
+        - deploy.zip
