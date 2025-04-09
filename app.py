@@ -83,6 +83,11 @@ class Transfer(db.Model):
 with app.app_context():
     db.create_all()
 
+def create_default_rows():
+
+        admin = Person(id=ADMIN_ID, name='admin', score=0, passcode='super_safe', allowance=100)
+        create_object(admin)
+
 def create_object(db_model_object):
     try: 
         db.session.add(db_model_object)
@@ -184,6 +189,28 @@ def render_dashboard_signed_in(user, status=None, messages_component_status=None
                             messages=messages,
                             people=people_info,
                             leader=leader)
+
+@app.route("/create_account", methods=['GET'])
+def create_account():
+    return render_create_account_page()
+
+def render_create_account_page():
+    return render_template('create_account.html')
+    
+@app.route("/create_account", methods=['POST'])
+def create_account_post():
+    name = request.form["name"]
+    passcode = request.form["passcode"]
+    if not name or not passcode:
+        return "Please fill out all fields <br> <a href='/create_account'>Go Back</a>", 400
+    person = find_person_by_name(name)
+    if person:
+        return "User already exists <br> <a href='/create_account'>Go Back</a>", 400
+    else:
+        person = Person(name=name, score=0, passcode=passcode, allowance=100)
+        create_object(person)
+        return redirect('/')
+
 
 @app.route("/transfer_points", methods=['POST'])
 def attempt_points_transfer():
