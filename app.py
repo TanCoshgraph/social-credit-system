@@ -196,7 +196,7 @@ def create_account():
 
 def render_create_account_page():
     return render_template('create_account.html')
-    
+
 @app.route("/create_account", methods=['POST'])
 def create_account_post():
     name = request.form["name"]
@@ -217,7 +217,10 @@ def attempt_points_transfer():
     sender_id = int(request.form["sender_id"])
     sender = find_person(sender_id)
 
-    # Verify that sender is current_user 
+    # Verify that sender is current_user
+    user_id = session.get('user_id')
+    if user_id == None:
+        return "Unauthorized"
     if sender_id != user_id:
         return "Unauthorized"
 
